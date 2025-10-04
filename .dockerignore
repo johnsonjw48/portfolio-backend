@@ -1,0 +1,6 @@
+.git
+.gitignore
+var/
+vendor/
+.env.local
+.env.*.local

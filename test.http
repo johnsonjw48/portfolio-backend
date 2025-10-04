@@ -1,0 +1,134 @@
+### Test 1: Contact valide - Devrait retourner 201
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "james@example.com",
+  "subject": "Demande de renseignements papa",
+  "message": "papa, mamamn stp"
+}
+
+### Test 2: Contact valide avec caractères accentués - Devrait retourner 201
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "François Léveillé",
+  "email": "francois@example.fr",
+  "subject": "Question générale",
+  "message": "Bonjour, j'aimerais en savoir plus sur votre portfolio et vos réalisations."
+}
+
+### Test 3: Nom manquant - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "subject": "Test sujet",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 4: Email invalide - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "email-invalide",
+  "subject": "Test sujet",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 5: Nom trop court (moins de 2 caractères) - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "J",
+  "email": "john@example.com",
+  "subject": "Test sujet",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 6: Sujet trop court (moins de 3 caractères) - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "AB",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 7: Message trop court (moins de 10 caractères) - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "Test sujet",
+  "message": "Court"
+}
+
+### Test 8: Tous les champs manquants - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{}
+
+### Test 9: Email manquant - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "subject": "Test sujet",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 10: Sujet manquant - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "message": "Message de test avec plus de 10 caractères"
+}
+
+### Test 11: Message manquant - Devrait retourner 400
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "Test sujet"
+}
+
+### Test 12: Contact avec message très long - Devrait retourner 201
+POST http://localhost:8080/api/contact
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "subject": "Proposition de collaboration",
+  "message": "Bonjour, je suis très impressionnée par votre portfolio et j'aimerais discuter d'une potentielle collaboration pour un projet que nous développons actuellement. Le projet concerne le développement d'une application web innovante dans le domaine de l'éducation. Seriez-vous disponible pour un appel dans les prochains jours ?"
+}
+
+### Test 13: Vérification de l'état de l'API
+GET http://localhost:8080/health
+
+### Test 14: Point d'entrée de l'API
+GET http://localhost:8080
+
+###
+GET localhost:8080/api/contacts
+
+###
+localhost:8080/api/doc.json
