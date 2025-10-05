@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Contact;
 use App\Event\ContactSubmittedEvent;
+use App\Form\ContactType;
 use App\Handler\ContactFormHandler;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\ContactService;
+use Exception;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -23,15 +26,7 @@ class ContactController extends AbstractController
         summary: 'Envoyer un message de contact',
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                required: ['name', 'email', 'subject', 'message'],
-                properties: [
-                    new OA\Property(property: 'name', type: 'string', example: 'John Doe'),
-                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
-                    new OA\Property(property: 'subject', type: 'string', example: 'Demande de renseignements'),
-                    new OA\Property(property: 'message', type: 'string', example: 'Bonjour, je voudrais...')
-                ]
-            )
+            content: new OA\JsonContent(ref: new Model(type: ContactType::class))
         ),
         tags: ['Contact']
     )]
@@ -79,7 +74,7 @@ class ContactController extends AbstractController
                 'success' => true,
                 'message' => 'Votre message a été envoyé avec succès'
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // En cas d'erreur dans les subscribers
             return $this->json([
                 'success' => false,
@@ -117,16 +112,7 @@ class ContactController extends AbstractController
                 new OA\Property(
                     property: 'data',
                     type: 'array',
-                    items: new OA\Items(
-                        properties: [
-                            new OA\Property(property: 'id', type: 'integer', example: 1),
-                            new OA\Property(property: 'name', type: 'string', example: 'John Doe'),
-                            new OA\Property(property: 'email', type: 'string', example: 'john@example.com'),
-                            new OA\Property(property: 'subject', type: 'string', example: 'Demande de renseignements'),
-                            new OA\Property(property: 'message', type: 'string', example: 'Bonjour, je voudrais...'),
-                            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time', example: '2025-10-04T21:00:00+02:00')
-                        ]
-                    )
+                    items: new OA\Items(ref: new Model(type: Contact::class))
                 ),
                 new OA\Property(
                     property: 'meta',
@@ -141,40 +127,10 @@ class ContactController extends AbstractController
             ]
         )
     )]
-    public function list(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function list(Request $request, ContactService $contactService): JsonResponse
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = min(100, max(1, (int) $request->query->get('limit', 10)));
-        $offset = ($page - 1) * $limit;
-
-        $repository = $entityManager->getRepository(Contact::class);
-
-        // Récupération du total
-        $total = $repository->count([]);
-
-        // Récupération des contacts paginés, triés par date décroissante
-        $contacts = $repository->findBy([], ['createdAt' => 'DESC'], $limit, $offset);
-
-        $data = array_map(function (Contact $contact) {
-            return [
-                'id' => $contact->getId(),
-                'name' => $contact->getName(),
-                'email' => $contact->getEmail(),
-                'subject' => $contact->getSubject(),
-                'message' => $contact->getMessage(),
-                'createdAt' => $contact->getCreatedAt()->format('c')
-            ];
-        }, $contacts);
-
-        return $this->json([
-            'success' => true,
-            'data' => $data,
-            'meta' => [
-                'total' => $total,
-                'page' => $page,
-                'limit' => $limit,
-                'totalPages' => (int) ceil($total / $limit)
-            ]
-        ]);
+        $page = (int) $request->query->get('page', 1);
+        $limit = (int) $request->query->get('limit', 10);
+        return $this->json($contactService->getPaginatedContacts($page, $limit));
     }
 }

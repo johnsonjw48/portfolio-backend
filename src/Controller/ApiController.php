@@ -7,7 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/', name: 'api_')]
+#[Route('/api', name: 'api_')]
 #[OA\Tag(name: 'Portfolio API')]
 class ApiController extends AbstractController
 {
