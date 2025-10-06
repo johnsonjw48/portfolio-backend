@@ -10,6 +10,7 @@ use App\Service\ContactService;
 use Exception;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -53,7 +54,8 @@ class ContactController extends AbstractController
     public function contact(
         Request $request,
         ContactFormHandler $formHandler,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        LoggerInterface $logger
     ): JsonResponse {
         $result = $formHandler->handle($request);
 
@@ -69,12 +71,24 @@ class ContactController extends AbstractController
             $event = new ContactSubmittedEvent($result['contact']);
             $eventDispatcher->dispatch($event, ContactSubmittedEvent::NAME);
 
+            $logger->info('Contact message submitted successfully', [
+                'email' => $result['contact']->getEmail(),
+                'name' => $result['contact']->getName()
+            ]);
+
             // Retour de succès
             return $this->json([
                 'success' => true,
                 'message' => 'Votre message a été envoyé avec succès'
             ], 201);
         } catch (Exception $e) {
+            // Log détaillé de l'erreur pour le debug
+            $logger->error('Failed to process contact message', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'email' => $result['contact']->getEmail() ?? 'unknown'
+            ]);
+
             // En cas d'erreur dans les subscribers
             return $this->json([
                 'success' => false,
