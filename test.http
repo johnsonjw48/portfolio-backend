@@ -3,8 +3,8 @@ POST http://localhost:8080/api/contact
 Content-Type: application/json
 
 {
-  "name": "John Doe",
-  "email": "james@example.com",
+  "name": "Isbath JOHNSON",
+  "email": "isbouraima48@gmail.com",
   "subject": "Demande de renseignements papa",
   "message": "papa, mamamn stp"
 }
